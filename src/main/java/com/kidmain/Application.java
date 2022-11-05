@@ -9,26 +9,25 @@ import java.util.Scanner;
 import java.util.stream.IntStream;
 
 /**
- * 1. getWordsList() – load the file {words_aplha.txt} and add word to List.
+ * 1. getWordsList() – load the file {alpha.txt} and add word to List.
  * 2. getRandomWord() – get a random word from the {wordsList}.
  * 3. printGameState() - print a current game state (guessed and unguessed letters).
  * 4. isAllLettersGuessed() – return TRUE if all letters of {guessingWord} are guessed.
  * 5. isWordGuessed() – return TRUE if player guessed the {guessingWord}.
- * 6. getPlayerLetterGuess() – ask player write a letter.
- * 7. getPlayerWordGuess() – ask player write a word.
- * 8. start() – public method to start the game.
+ * 6. isPlayerGuessedLetter() – ask player write a letter and count wrong guessed letters.
+ * 7. isPlayerGuessedWord() – ask player write a word.
+ * 8. start() – public method to start the game with victory/defeat texts.
  */
 
 public class Application {
-    private final String pathOfWords = "words_alpha.txt";
     private final String guessingWord = getRandomWord();
     private final List<Character> playerLetterGuesses = new ArrayList<>();
-    private String playerWordGuess = "";
-    private final String victoryText = "==========\nCONGRATULATIONS!!! YOU HAVE GUESSED THE WORD :)\n==========";
+    private int wrongLetterGuesses = 0;
 
     private List<String> getWordsList() {
         Scanner scanner;
         try {
+            String pathOfWords = "words_alpha.txt";
             scanner = new Scanner(new File(pathOfWords));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
@@ -56,6 +55,29 @@ public class Application {
                 System.out.print("-");
             }
         }
+
+        System.out.println("\n _____");
+        System.out.println(" |   |");
+
+        if (wrongLetterGuesses >= 1) {
+            System.out.println(" O   ");
+        }
+        if (wrongLetterGuesses >= 2) {
+            System.out.print("\\");
+        }
+        if (wrongLetterGuesses >= 3) {
+            System.out.println(" /");
+        }
+        if (wrongLetterGuesses >= 4) {
+            System.out.println(" |   ");
+        }
+        if (wrongLetterGuesses >= 5) {
+            System.out.print("/");
+        }
+        if (wrongLetterGuesses >= 6) {
+            System.out.println(" \\");
+        }
+
         System.out.println();
     }
 
@@ -69,46 +91,55 @@ public class Application {
         return guessedLettersCount == guessingWordLength;
     }
 
-
-    private boolean isWordGuessed() {
-        return playerWordGuess.equals(guessingWord);
-    }
-
-    private void getPlayerLetterGuess() {
+    private boolean isPlayerGuessedLetter() {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Please enter a letter: ");
         String letterGuess = scanner.nextLine();
 
         playerLetterGuesses.add(letterGuess.charAt(0));
+
+        return guessingWord.contains(letterGuess);
     }
 
-    private void getPlayerWordGuess() {
+    private boolean isPlayerGuessedWord() {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Please enter your guess for the word: ");
-        playerWordGuess = scanner.nextLine();
+        String playerWordGuess = scanner.nextLine();
+
+        return playerWordGuess.equals(guessingWord);
     }
 
     public void start() {
+        String victoryText = "==========\nCONGRATULATIONS!!! YOU HAVE GUESSED THE WORD :)\n==========";
+        String defeatText = "==========\nYOU HAVE LOST :C TRY AGAIN\n==========";
         while (true) {
-            getPlayerLetterGuess();
+            if (!isPlayerGuessedLetter()) {
+                wrongLetterGuesses++;
+                if (wrongLetterGuesses == 6) {
+                    printGameState();
+                    System.out.println(defeatText);
+                    break;
+                }
+            }
+
             if (isAllLettersGuessed()) {
+                printGameState();
                 System.out.println(victoryText);
                 break;
             }
 
             printGameState();
 
-            getPlayerWordGuess();
-            if (isWordGuessed()) {
+            if (isPlayerGuessedWord()) {
+                printGameState();
                 System.out.println(victoryText);
                 break;
             } else {
-                System.out.println("Nope :C Nice try.");
+                printGameState();
+                System.out.println("Nope :C Nice try.\n");
             }
-
-            printGameState();
         }
     }
 
