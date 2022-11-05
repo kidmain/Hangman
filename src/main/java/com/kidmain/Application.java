@@ -15,13 +15,14 @@ import java.util.stream.IntStream;
  * 4. isAllLettersGuessed() – return TRUE if all letters of {guessingWord} are guessed.
  * 5. isWordGuessed() – return TRUE if player guessed the {guessingWord}.
  * 6. isPlayerGuessedLetter() – ask player write a letter and count wrong guessed letters.
- * 7. isPlayerGuessedWord() – ask player write a word.
- * 8. start() – public method to start the game with victory/defeat texts.
+ * 7. isPlayerGuessedWord() – ask a player write a word.
+ * 8. getGameVersion() – ask a player how he wants to play: with PC or alone.
+ * 9. start() – public method to start the game with victory/defeat texts.
  */
 
 public class Application {
-    private final String guessingWord = getRandomWord();
     private final List<Character> playerLetterGuesses = new ArrayList<>();
+    private String guessingWord;
     private int wrongLetterGuesses = 0;
 
     private List<String> getWordsList() {
@@ -40,7 +41,15 @@ public class Application {
         return wordsList;
     }
 
-    private String getRandomWord() {
+    private String getGuessingWord(String command) {
+        if (command.equals("friend")) {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Please enter a word and do not show it to the friend!");
+            String guessingWord = scanner.nextLine();
+            // There is no way to clean the console, but we need to hide the written guessing word.
+            System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+            return guessingWord;
+        }
         List<String> wordsList = getWordsList();
         Random random = new Random();
         return wordsList.get(random.nextInt(wordsList.size()));
@@ -111,15 +120,33 @@ public class Application {
         return playerWordGuess.equals(guessingWord);
     }
 
+    private void getGameVersion() {
+        System.out.println("Play with \\computer or with \\friend?");
+        Scanner scanner = new Scanner(System.in);
+        String playerAnswer = scanner.nextLine();
+
+        if (playerAnswer.equals("\\friend")) {
+            guessingWord = getGuessingWord("friend");
+            System.out.println("Launch the game with a friend.");
+        } else {
+            System.out.println("Launch the game with a computer.");
+            guessingWord = getGuessingWord("computer");
+        }
+    }
+
     public void start() {
         String victoryText = "==========\nCONGRATULATIONS!!! YOU HAVE GUESSED THE WORD :)\n==========";
-        String defeatText = "==========\nYOU HAVE LOST :C TRY AGAIN\n==========";
+        String defeatText = "==========\nYOU HAVE LOST :C\nThe guessing word was " + guessingWord + "\n==========";
+
+        getGameVersion();
+
         while (true) {
             if (!isPlayerGuessedLetter()) {
                 wrongLetterGuesses++;
-                if (wrongLetterGuesses == 6) {
+                if (wrongLetterGuesses >= 6) {
                     printGameState();
                     System.out.println(defeatText);
+                    System.out.println(guessingWord);
                     break;
                 }
             }
